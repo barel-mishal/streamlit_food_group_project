@@ -134,9 +134,11 @@ def main():
         (.1, 1, .1, 1, .1))
 
     with row4_1:
-        st.image('results\index.jpg', use_column_width=True)
+        path = os.path.join(__DIRNAME__, 'results', 'index.jpg')
+        st.image(path, use_column_width=True)
     with row4_2:
-        st.image('results\\results_results_multi_reg.png', use_column_width=True)
+        path2 = os.path.join(__DIRNAME__, 'results', 'results_results_multi_reg.png')
+        st.image(path2, use_column_width=True)
 
     row2_spacer1, row_7, row2_spacer2 = st.columns((.1, 3.2, .1))
     with row_7:
