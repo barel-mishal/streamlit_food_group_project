@@ -5,6 +5,7 @@ from sklearn.metrics.pairwise import linear_kernel
 from sklearn.metrics.pairwise import cosine_similarity
 import hebrew_tokenizer as ht
 import joblib
+import numpy as np
 from helpers.constants import ISRAELI_DATA_PATH, MACRO_NUTRIENTS, MICRO_NUTRIENTS, NUMBER_OF_FOOD_GROUPS, FOOD_STOP_WORDS
 
 CUTOFF = 30
