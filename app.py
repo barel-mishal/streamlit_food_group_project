@@ -4,7 +4,7 @@ import streamlit as st
 import pandas as pd
 from streamlit_lottie import st_lottie
 import requests
-# from recommender_system import show_recommendations
+from recommender_system import show_recommendations
 from PIL import Image
 
 __DIRNAME__ = os.path.dirname(os.path.realpath(__file__))
