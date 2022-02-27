@@ -4,7 +4,7 @@ import streamlit as st
 import pandas as pd
 from streamlit_lottie import st_lottie
 import requests
-# from recommender_system import show_recommendations
+from recommender_system import show_recommendations
 from PIL import Image
 
 __DIRNAME__ = os.path.dirname(os.path.realpath(__file__))
@@ -47,17 +47,17 @@ def select_box(dicty):
     st.image(dicty[pic], use_column_width=True)
 
 
-# def recommend(item):
-#   r1, r2, r3 = show_recommendations(item)
-#   st.markdown(''' #####  המלצה לפי טקסט דומה ''')
-#   for i, v in r1.iteritems():
-#     v
-#   st.markdown(''' #####  המלצה לפי ערכי מאקרו דומים ''')
-#   for i, v in r2.iteritems():
-#     v
-#   st.markdown(''' ##### המלצה לפי ערכי מאקרו ומיקרו דומים ''')
-#   for i, v in r3.iteritems():
-#     v
+def recommend(item):
+  r1, r2, r3 = show_recommendations(item)
+  st.markdown(''' #####  המלצה לפי טקסט דומה ''')
+  for i, v in r1.iteritems():
+    v
+  st.markdown(''' #####  המלצה לפי ערכי מאקרו דומים ''')
+  for i, v in r2.iteritems():
+    v
+  st.markdown(''' ##### המלצה לפי ערכי מאקרו ומיקרו דומים ''')
+  for i, v in r3.iteritems():
+    v
 
 def main():
     lottie_book = load_lottieurl('https://assets2.lottiefiles.com/temp/lf20_nXwOJj.json')
