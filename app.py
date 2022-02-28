@@ -47,7 +47,7 @@ def select_word_cloud():
 
 def make_parallel_coordinates(df, color, columns):
     df['three_type_of_recommendtion'] = color
-    columns = ['colory', *columns]
+    columns = ['three_type_of_recommendtion', *columns]
     print(df[columns].reset_index())
     return px.parallel_coordinates(
         df[columns].reset_index(), 
