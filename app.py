@@ -45,7 +45,7 @@ def select_word_cloud():
     
     select_box(dic_imagens)
 
-def make_parallel_coordinates(df, color: pd.Series, columns: list[str]):
+def make_parallel_coordinates(df, color, columns):
     df['colory'] = color
     columns = ['colory', *columns]
     print(df[columns].reset_index())
