@@ -1,9 +1,12 @@
 import os
 from re import X
+from typing import List
+from helpers.constants import MACRO_NUTRIENTS
 import streamlit as st
 import pandas as pd
 from streamlit_lottie import st_lottie
 import requests
+import plotly.express as px
 from recommender_system import show_recommendations
 from PIL import Image
 
@@ -20,6 +23,7 @@ def load_lottieurl(url: str):
 def recommender():
   # taking only the items names 
   data = DATASET[['shmmitzrach']].rename(columns={'shmmitzrach': 'שם מצרך'})
+
   # write into the app
   st.markdown('**FOOD NAMES IN DATASET**')
   st.write(data)
@@ -41,14 +45,46 @@ def select_word_cloud():
     
     select_box(dic_imagens)
 
+def make_parallel_coordinates(df, color: pd.Series, columns: list[str]):
+    df['colory'] = color
+    columns = ['colory', *columns]
+    print(df[columns].reset_index())
+    return px.parallel_coordinates(
+        df[columns].reset_index(), 
+        # dimensions=['sepal_width', 'sepal_length', 'petal_width',
+        #             'petal_length'],
+        color=color,
+        color_continuous_scale=px.colors.diverging.Tealrose,
+        color_continuous_midpoint=2)
+
+
+def get_data_for_parallel_coordinates(df: pd.DataFrame):
+    df_foods_items = DATASET.set_index('shmmitzrach').loc[df.shmmitzrach.values]
+
+    fig = make_parallel_coordinates(
+        df_foods_items, 
+        df.recommendation.values, 
+        MACRO_NUTRIENTS
+        )
+    st.plotly_chart(fig)
+
 
 def select_box(dicty):
     pic = st.selectbox("Title", list(dicty.keys()))
     st.image(dicty[pic], use_column_width=True)
 
 
+
 def recommend(item):
   r1, r2, r3 = show_recommendations(item)
+  group1 = pd.Series([1 for _ in range(r1.size)], name='recommendation')
+  group2 = pd.Series([2 for _ in range(r2.size)], name='recommendation')
+  group3 = pd.Series([3 for _ in range(r3.size)], name='recommendation')
+  r1, r2, r3 = pd.concat([r1.reset_index(drop=True), group1], axis=1), pd.concat([r2.reset_index(drop=True), group2], axis=1 ), pd.concat([r3.reset_index(drop=True), group3], axis=1)
+  
+  get_data_for_parallel_coordinates(pd.concat([r1, r2, r3]))
+
+
   st.markdown(''' #####  המלצה לפי טקסט דומה ''')
   for i, v in r1.iteritems():
     v
@@ -58,6 +94,9 @@ def recommend(item):
   st.markdown(''' ##### המלצה לפי ערכי מאקרו ומיקרו דומים ''')
   for i, v in r3.iteritems():
     v
+
+
+
 
 def main():
     lottie_book = load_lottieurl('https://assets2.lottiefiles.com/temp/lf20_nXwOJj.json')
@@ -97,6 +136,8 @@ def main():
         st.markdown("For this matter, we received a list from the ministry of health containing all the Israeli food groups (32) with known food items in each group, and our objective is to cluster the different food items in the Israeli data into their respective food groups. We want to use the known ones and let the clustering algorithms answer the question of how to label food items that fall under more than one food group category. The inputs for the clustering algorithms are the macronutrients (proteins, carbohydrates and fats), since they are the values who mostly affect the labeling of each food item to a food group as we can see in the following radar plot:") 
         radar = Image.open(os.path.join(__DIRNAME__, 'results', 'radar.jpg')) #learning_algo_accuracy.jpg
         st.image(radar, use_column_width=True)
+        
+
         st.markdown("In this plot we present 3 food items where each one belongs to a different food group (Chicken breast = Meat group for chicken and turkey, Pita = Pastry group for breads, and Hazelnut = Nuts and seeds group), and we can see how their different macronutrient breakdown differs, thus implying their food group.")
         st.markdown("We applied many clustering algorithms (un/even cluster size, different expected manifolds geometry, with/out outlier removal, etc) – K Means, Agglomerative, DBScan and Spectral clustering, and show the results in a [Heroku dashboard site](https://dashboard-food-group.herokuapp.com/) (might need to load for a few seconds) where one can switch between the algorithms and see a plot of the results, along with a mapping table between food groups and the clustering labels (detailed in the evaluation section).")
 
@@ -201,7 +242,10 @@ We can see that the Agglomerative clustering achieves the best scores on all met
         st.write('')
 
         st.subheader('3. Evaluating food alternatives recommendation:')
+        
+        
         recommender()
+
 
         # st.pyplot(fig)
 

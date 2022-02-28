@@ -11,6 +11,10 @@ from helpers.constants import ISRAELI_DATA_PATH, MACRO_NUTRIENTS, MICRO_NUTRIENT
 CUTOFF = 30
 # Libraries for Barel: Pandas, sklearn, hebrew_tokenizer, joblib
 
+
+
+
+
 def preprocess_data():
     data = pd.read_csv(ISRAELI_DATA_PATH)
     data = data[['shmmitzrach'] + MACRO_NUTRIENTS + ['alcohol'] + MICRO_NUTRIENTS]
