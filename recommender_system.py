@@ -61,7 +61,7 @@ def find_food_item(data, item):
                 food_found = True
                 break
     if not food_found:
-        exit("could not find a match for the given food item... exiting")
+        food_item = -1
     return food_item
 
 
@@ -99,13 +99,14 @@ def content_based_recommender(item):
 
 def show_recommendations(item):
     data, food_item, cosine_sim_names, cosine_sim_macros, cosine_sim_micros, indices = content_based_recommender(item)
-    
+    if food_item == -1:
+        return None, None, None, food_item
     first_recommendation = get_recommendations(data, food_item, cosine_sim_names, indices)
     
     second_recommendation = get_recommendations(data, food_item, cosine_sim_macros, indices)
     
     third_recommendation = get_recommendations(data, food_item, cosine_sim_micros, indices)
     
-    return first_recommendation, second_recommendation, third_recommendation
+    return first_recommendation, second_recommendation, third_recommendation, food_item
 
 

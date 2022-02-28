@@ -1,3 +1,4 @@
+from optparse import Values
 import os
 from re import X
 from typing import List
@@ -12,6 +13,14 @@ from PIL import Image
 
 __DIRNAME__ = os.path.dirname(os.path.realpath(__file__))
 DATASET = pd.read_csv(os.path.join(__DIRNAME__, 'israeli_data.csv'))
+
+FOOD_GROUP_EXAMPLE = {
+    0: [56208068,56200410,50020000,57602118,56113010,56207258,56200500,51401000,56205110],# הדגנים
+    1: [75117010,73101010,75109000,73201040,73302020,90000065,75111000,75111030,75102500],# הירקות
+    2: [63139010,63135010,61101010,63107010,63115010,63146010,63126500,63126510,63109010],# פירות
+    3: [41302020,41303030,41101120,41400030,75224022,41400030,41205149,41209028,42116030],# הקטניות
+    4: [43102000,43102119,43101000,42107000,82104000,82101000,82101029,82101100,82101300],# קבוצת השמנים
+}
 
 st.set_page_config(layout="wide")
 def load_lottieurl(url: str):
@@ -46,27 +55,20 @@ def select_word_cloud():
     select_box(dic_imagens)
 
 def make_parallel_coordinates(df, color, columns):
-    df['three_type_of_recommendtion'] = color
-    columns = ['three_type_of_recommendtion', *columns]
-    print(df[columns].reset_index())
     return px.parallel_coordinates(
-        df[columns].reset_index(), 
-        # dimensions=['sepal_width', 'sepal_length', 'petal_width',
-        #             'petal_length'],
+        df[columns], 
         color=color,
         color_continuous_scale=px.colors.diverging.Tealrose,
-        color_continuous_midpoint=2)
+        color_continuous_midpoint=2, width=1000)
 
 
-def get_data_for_parallel_coordinates(df: pd.DataFrame):
-    df_foods_items = DATASET.set_index('shmmitzrach').loc[df.shmmitzrach.values]
-
+def get_data_for_parallel_coordinates(df: pd.DataFrame, columns):
     fig = make_parallel_coordinates(
-        df_foods_items, 
-        df.recommendation.values, 
-        MACRO_NUTRIENTS
+        df, 
+        columns[0], 
+        columns
         )
-    st.plotly_chart(fig)
+    return st.plotly_chart(fig)
 
 
 def select_box(dicty):
@@ -74,26 +76,39 @@ def select_box(dicty):
     st.image(dicty[pic], use_column_width=True)
 
 
-
 def recommend(item):
-  r1, r2, r3 = show_recommendations(item)
+  r1, r2, r3, food_item = show_recommendations(item)
+  if r1 is None:
+      ''' **Could not find your item please try another** '''
+      return 
   group1 = pd.Series([1 for _ in range(r1.size)], name='recommendation')
   group2 = pd.Series([2 for _ in range(r2.size)], name='recommendation')
   group3 = pd.Series([3 for _ in range(r3.size)], name='recommendation')
   r1, r2, r3 = pd.concat([r1.reset_index(drop=True), group1], axis=1), pd.concat([r2.reset_index(drop=True), group2], axis=1 ), pd.concat([r3.reset_index(drop=True), group3], axis=1)
-  
-  get_data_for_parallel_coordinates(pd.concat([r1, r2, r3]))
+  df = pd.concat([r1, r2, r3])
+  df_foods_items = DATASET.set_index('shmmitzrach').loc[df.shmmitzrach.values]
+  df_foods_items['three_type_of_recommendtion'] = df.recommendation.values
+  columns = ['three_type_of_recommendtion', 'protein', 'total_fat', 'carbohydrates']
+  if food_item != item:
+      f'''
+      **Could not find your chosen food item in the data.**
+      
+      Showing recommendtions for the first match - {food_item}.
+
+      For exact match look at the data above
+      '''
+  else:
+      f'Showing recommendtions for {food_item}'  
 
 
   st.markdown(''' #####  המלצה לפי טקסט דומה ''')
-  for i, v in r1.iteritems():
-    v
+  r1
   st.markdown(''' #####  המלצה לפי ערכי מאקרו דומים ''')
-  for i, v in r2.iteritems():
-    v
+  r2
   st.markdown(''' ##### המלצה לפי ערכי מאקרו ומיקרו דומים ''')
-  for i, v in r3.iteritems():
-    v
+  r3
+
+  get_data_for_parallel_coordinates(df_foods_items.reset_index(), columns)
 
 
 
@@ -134,9 +149,27 @@ def main():
         st.subheader('**1.** Clustering of food items to food groups.')
         st.markdown('''There are no known food group labels for food items in the Israeli data (or the American data for that matter), since some food items cannot be classified into one food group, but to several. For example, if we look at a food item - Pizza, it could fall into the Fat food group as it has high amounts of fat, however, it could also fall into the dairy food group depending on the amount of cheese on the pizza. Moreover, a pizza could be in the cereal food group because of its bread. Many more examples follow, though there are some food items which we unequivocally know their food group, like milk for instance.''')
         st.markdown("For this matter, we received a list from the ministry of health containing all the Israeli food groups (32) with known food items in each group, and our objective is to cluster the different food items in the Israeli data into their respective food groups. We want to use the known ones and let the clustering algorithms answer the question of how to label food items that fall under more than one food group category. The inputs for the clustering algorithms are the macronutrients (proteins, carbohydrates and fats), since they are the values who mostly affect the labeling of each food item to a food group as we can see in the following radar plot:") 
+        
+        
         radar = Image.open(os.path.join(__DIRNAME__, 'results', 'radar.jpg')) #learning_algo_accuracy.jpg
         st.image(radar, use_column_width=True)
         
+        df_foods_items = DATASET.set_index('smlmitzrach').loc[[item for items in FOOD_GROUP_EXAMPLE.values() for item in items]]
+        
+        food_group_types = [[group]*len(Values) for group, Values in FOOD_GROUP_EXAMPLE.items()]
+        flatten = [groupid for group in food_group_types for groupid in group]
+        print(type(flatten[0]))
+        df_foods_items['TypeOfFoodGroup'] = flatten
+        
+
+        columns = ['TypeOfFoodGroup', 'protein', 'total_fat', 'carbohydrates', 'calcium', 'iron', 'magnesium']
+
+        
+        st.plotly_chart(px.parallel_coordinates(
+            df_foods_items[columns], 
+            color='TypeOfFoodGroup',
+            color_continuous_scale=px.colors.diverging.Tealrose,
+            color_continuous_midpoint=2, width=1000))
 
         st.markdown("In this plot we present 3 food items where each one belongs to a different food group (Chicken breast = Meat group for chicken and turkey, Pita = Pastry group for breads, and Hazelnut = Nuts and seeds group), and we can see how their different macronutrient breakdown differs, thus implying their food group.")
         st.markdown("We applied many clustering algorithms (un/even cluster size, different expected manifolds geometry, with/out outlier removal, etc) – K Means, Agglomerative, DBScan and Spectral clustering, and show the results in a [Heroku dashboard site](https://dashboard-food-group.herokuapp.com/) (might need to load for a few seconds) where one can switch between the algorithms and see a plot of the results, along with a mapping table between food groups and the clustering labels (detailed in the evaluation section).")
