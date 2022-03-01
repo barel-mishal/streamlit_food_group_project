@@ -49,12 +49,13 @@ def select_word_cloud():
     path = os.path.join(__DIRNAME__, 'results', 'word_cloud')
     
     photos_name = os.listdir(path)
-    #  name_number.png
-    parse = lambda x: x.split('_')[1].split('.')[0]
+    photos_name = ['results_'+str(i)+'.png' for i in range(32)]
+
     to_img = lambda x: Image.open(os.path.join(__DIRNAME__, 'results', 'word_cloud', x))
-    
-    dic_imagens = {f'clustring Lable {parse(x)}': to_img(x) for x in photos_name}
-    
+
+    dic_imagens = {}
+    for i, x in enumerate(photos_name):
+        dic_imagens[f'Clustering label {i}'] = to_img(x)
     
     select_box(dic_imagens)
 
@@ -77,7 +78,7 @@ def get_data_for_parallel_coordinates(df: pd.DataFrame, columns):
 
 def select_box(dicty):
     pic = st.selectbox("Title", list(dicty.keys()))
-    st.image(dicty[pic], use_column_width=True)
+    st.image(dicty[pic]) # , use_column_width=True
 
 
 def recommend(item):
@@ -95,14 +96,13 @@ def recommend(item):
   columns = ['three_type_of_recommendtion', 'protein', 'total_fat', 'carbohydrates']
   if food_item != item:
       f'''
-      **Could not find your chosen food item in the data.**
       
-      Showing recommendtions for the first match - {food_item}.
+      **Showing recommendtions for the first match - {food_item}**.
 
-      For exact match look at the data above
+      *For exact match look at the data above*
       '''
   else:
-      f'Showing recommendtions for {food_item}'  
+      f'**Showing recommendtions for {food_item}**'
 
 
   st.markdown(''' #####  המלצה לפי טקסט דומה ''')
@@ -141,13 +141,13 @@ def parallel_coordinates():
         color_continuous_midpoint=2, width=1000))
 
 def get_radar():
-    st.subheader('Figure 1')
+    st.markdown('##### Figure 1')
     radar = Image.open(os.path.join(__DIRNAME__, 'results', 'radar.png')) #learning_algo_accuracy.jpg
     st.image(radar) # , use_column_width=True
 
 
 def get_table():
-    st.subheader('Figure 2')
+    st.markdown('##### Figure 2')
     st.image(Image.open(os.path.join(__DIRNAME__, 'results', 'Mappingtable.jpg')))
 
 def main():
@@ -256,7 +256,7 @@ def main():
                 '''
     The main issue with the visual evaluation (as shown in Fig 1 and Fig 2) is that we would prefer a quantification using our ground truth labels. Thus, in order to see a numerical evaluation of our clustering, we created a test set containing the known food items to food groups (from the ministry of health list, 320 food items). We applied the following extrinsic measures (metrics used for comparing two clustering labels): Adjusted Rand Index score, Fowlkes Mellows score, Adjusted Mutual Information score and the V-measure score. Using these metrics we could further optimize our clustering algorithms (for instance, we decided to also use alcohol as part of our input as it also helped us increase our scores).
     ''')
-        st.subheader('Figure 3')
+        st.markdown('##### Figure 3')
         st.image(Image.open(os.path.join(__DIRNAME__, 'results', 'cluster_scores.png')))
         
         st.markdown('''
@@ -264,6 +264,7 @@ def main():
         ''')
 
     st.markdown("To further visualize and qualitatively evaluate our clustering, we use a word-could to show similarities between the food-groups. These figures show the food-items text (without stopwords) as well as their attached food groups written as their titles. Clusters without a mapping to a known food group are titled as ‘לא סווג’. All word clouds for each cluster label can be seen here, where some word clouds have labels that were mapped to a single food group, while others have lables that wee mapped to several food groups.")
+    st.markdown('##### Figure 4')
     select_word_cloud()
 
     line1_spacer1, line2_1, line1_spacer2 = st.columns((.1, 3.2, .1))
@@ -274,78 +275,39 @@ def main():
 
         st.markdown(
             '''
-    The prediction task is a multi-output regression problem, thus the straightforward way to evaluate it is by splitting our data into train and test sets and computing our accuracy on the test set. However, we are dealing with numbers in the Microgram or Nano-gram ranges, so it was proven quite difficult to achieve high accuracy with exact numbers. Therefore, we wanted to know how far away we are from the exact micronutrient value. For this reason, when calculating the accuracy we decided to give a small error range of one micro-gram and we can consider our predictive model to be successful if it is correct with an error on one microgram.
-            
-    The main issue we had with this evaluation is the lack of data (we only have 4560 food items). Therefore we decided to use the FDC data as part of our training data, and since we want to be successful with the Israeli data, our test set only contained food items from there.
-    After Applying all regression algorithms and taking into account a small error of one Microgram the accuracy results we got are:
-
+    The prediction task is a multi-output regression problem, thus we can evaluate it by splitting our data into train and test sets and computing our accuracy on the test set. To count for the wide range of numeric values (our prediction is in the Milligram or Microgram ranges), when calculating the accuracy we decided to give a small error range of one milligram and we can consider our predictive model to be successful if it is correct with an error on one milligram. To deal with the lack of data in the Israeli records (only 4560 food items), for training we used  the FDC data, while our test set contains only the Israeli data.
             ''')
+        st.markdown("From Fig 5 we can see that the FDC data does not help much, probably due to overfitting or because it is still not enough to properly learn (even combined, the amount of food items is just a little over 10,000). Secondly, we can see that the Decision Tree algorithm achieved the highest accuracy with about 76% accuracy on average, where ensemble methods only reduce the prediction accuracy. Trying to apply the same algorithm to a single micronutrient at a time (instead of a multi-output) improved the accuracy for some. For instance, we saw that for vitamin b6 the Linear regression algorithm performs best with 98% accuracy, hence we assume that this vitamin has a linear relation to the macronutrients, while other vitamins and minerals have different relations. To conclude, on average the decision tree is the most suitable for the prediction task, with possibility to improve for specific micronutrients.")
 
+        st.markdown('##### Figure 5')
         path2 = os.path.join(__DIRNAME__, 'results', 'accu_on_test.png')
-        st.image(Image.open(path2), use_column_width=True)   
-
-        st.markdown(
-            '''
-    Firstly, we can see that the FDC data does not help much or even at all, which is probably due to overfitting to it or because it is still not enough to properly learn (even combined, the number of food items is just a little over 10,000). Secondly, we can see that the Decision Tree algorithm achieved the highest accuracy with about 71% accuracy on average. It does not seem like much, which is why we tried exploring applying the same algorithms for just one micro-nutrient at a time (instead of a multi-output). We saw that some algorithms perform better than others for different micronutrients. For instance, we saw that for vitamin b6 the Linear regression algorithm performs best with 98% accuracy, so we assume this vitamin has a linear relation to the macronutrients, while other vitamins and minerals have different relations. In conclusion, we see that on average the decision tree algorithm is the most fit for the prediction task, achieving very high accuracy on some micro-nutrients and also lower on others depending on their relation.           
-            ''')
+        st.image(Image.open(path2))
 
         st.write('')
 
         st.subheader('3. Evaluating food alternatives recommendation:')
-        
-        
-        #recommender()
+
 
 
         # st.pyplot(fig)
 
         st.markdown(
             '''
-Due to the fact there are no ratings of food items we can use, we cannot evaluate our recommender system by creating a test set and computing the root-mean-square error for example. However, there is a way for us to know if our recommender is indeed successful and that is by using the Precision and the Normalized Discounted cumulative gain (NDCG) evaluation metrics.
-
-Given a food item, for each feature vector we recommend K items which we consider as positives and in order to calculate Precision and NDCG, we use our first step – the food groups clustering. Since we want to offer alternative food items within the same food group, we compare the food group label of the given food item to the food group label of the recommended items. For the K positive recommendations, if the labels match than we consider it a true positive, otherwise it is a false positive. With that in mind, we can compare the different feature vectors of the recommendations on different food items to see which has the best results, and also find the proper value of K to see how many items we should recommend.
-
-The result we got for 2 food item (milk and lettuce) are:
+Since there are no ratings of food items we can use, we cannot evaluate our recommender system by creating a test set and computing the root-mean-square error. However, we can know if our recommender is successful by using the Precision and the Normalized Discounted cumulative gain (NDCG) evaluation metrics. Given a food item, for each feature vector we recommend K items which we consider as positives. To calculate Precision and NDCG, we use our food groups clustering as ground truth. Since we want to offer alternative food items within the same food group, we compare the food group label of the given food item to the food group label of the recommended items. For the K positive recommendations, true positive is when the labels match, otherwise it is a false positive. With that in mind, we can compare the different feature vectors of the recommendations on different food items to see which has the best results, and find the proper value of K to see how many items we should recommend. Inspecting varios results (not shown) on average K=10 has the best scores for both Precision and NDCG.
             ''')
 
+        st.markdown("Fig 6 shows results for 2 food items (milk and lettuce). We can see that for milk we achieve a very high NDCG for both macronutrient and micronutrient feature vector, while for lettuce we achieve higher NDCG for the name feature vector rather than the macronutrient and micronutrient feature vector.")
+    st.markdown('##### Figure 6')
     one, two = st.columns((1, 1)) 
 
     with one:
-        path = os.path.join(__DIRNAME__, 'results', '1NDCG.jpg')
+        path = os.path.join(__DIRNAME__, 'results', 'recommender_milk.png')
         st.image(Image.open(path), use_column_width=True)
     with two:
-        path2 = os.path.join(__DIRNAME__, 'results', '2NPRE.jpg')
-        st.image(Image.open(path2), use_column_width=True)   
-    with one:
-        path = os.path.join(__DIRNAME__, 'results', '3NDCG.jpg')
-        st.image(Image.open(path), use_column_width=True)
-    with two:
-        path2 = os.path.join(__DIRNAME__, 'results', '4PRECI.jpg')
-        st.image(Image.open(path2), use_column_width=True)    
+        path2 = os.path.join(__DIRNAME__, 'results', 'recommender_lettuce.png')
+        st.image(Image.open(path2), use_column_width=True)
 
     line1_spacer1, line2_1, line1_spacer2 = st.columns((.1, 3.2, .1))
-
-
-    with line2_1:   
-        st.markdown(
-            '''
-We can see that for the food item milk we achieve very high NDCG for the macronutrient and micronutrient feature vector, while for the food item lettuce we achieve high NDCG for the name feature vector. Similar cases follow, and while we cannot show the results for every food item, we can see that on average K=10 has the best scores for both Precision and NDCG, and because some feature vectors perform better than others for different food items, we show 3 different recommendations. Specifically, in the streamlit app, one can enter a food item in Hebrew and see 3 different kinds of recommendation based on the three item profiles.
-            ''')
- 
-    line1_spacer1, line2_12, line1_spacer2 = st.columns((.1, 3.2, .1))
-
-    with line2_12:    
-        
-        st.subheader('3. Evaluating food alternatives recommendation:')
-
-        st.markdown('''
-In the future we believe an improved clustering can be achieved by a better filtering of outliers and noise (food items that should not be clustered to any food group like ‘similak’). While we tried our best to filter any noise, the results we got are still lacking and we believe that a better constructed data can help in the food groups clustering.
-
-Moreover, we believe further investigation regarding the relation of every micronutrient to the macronutrients can help in deciding which algorithm should be used for every micro-nutrient and improve the prediction accuracy.
-
-Finally, by collecting user data on the Israeli food items, the recommendation can be improved significantly and with enough ratings, a collaborative recommender system could be used.
-            ''')
-
     
 
     line1_spacer1, line2_12, line1_spacer2 = st.columns((.1, 3.2, .1))
@@ -355,19 +317,13 @@ Finally, by collecting user data on the Israeli food items, the recommendation c
         st.subheader('Future Work:')
 
         st.markdown('''
-In the future we believe an improved clustering can be achieved by a better filtering of outliers and noise (food items that should not be clustered to any food group like ‘similak’). While we tried our best to filter any noise, the results we got are still lacking and we believe that a better constructed data can help in the food groups clustering.
-
-Moreover, we believe further investigation regarding the relation of every micronutrient to the macronutrients can help in deciding which algorithm should be used for every micro-nutrient and improve the prediction accuracy.
-
-Finally, by collecting user data on the Israeli food items, the recommendation can be improved significantly and with enough ratings, a collaborative recommender system could be used.
+In the future, an improved clustering can be achieved by better filtering outliers and noise (food items that should not be clustered to any food group like ‘similak’). While we tried our best to filter any noise, we believe that better constructed data can help in the clustering. Moreover, further investigation regarding the relation of every micronutrient to the macronutrients can help in deciding which algorithm should be used for every micronutrient and improve the prediction accuracy. Finally, by collecting user data on the Israeli food items, the recommendation can be improved significantly and with enough ratings, a collaborative recommender system could be used.
 ''')
 
         st.subheader('Conclusion:')
 
         st.markdown('''
-In this project we got to experiment with different areas of Israeli nutrition, attempting to help nutritionist better classify the food groups of food items, predict unknown micronutrients, rather than relying on intuition and hopefully offer better food item alternatives for their patients.
-
-We hope our findings can help the nutrition field and act as a basis for further improvements.
+In this project we experimented with different areas of Israeli nutrition, attempting to help nutritionists better classify the food groups of food items, predict unknown micronutrients, and hopefully offer better food item alternatives for their patients. We hope our findings can help the nutrition field and act as a basis for further improvements.
 ''')
 
         st.header('')
