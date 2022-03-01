@@ -1,11 +1,7 @@
-import io
-from optparse import Values
 import os
 from re import X
-from helpers.constants import MACRO_NUTRIENTS
 import streamlit as st
 import pandas as pd
-import requests
 import plotly.express as px
 from recommender_system import show_recommendations
 from PIL import Image
@@ -36,18 +32,18 @@ def recommender():
 
 
 def select_word_cloud():
-    path = os.path.join(__DIRNAME__, 'results', 'word_cloud')
-    
-    photos_name = os.listdir(path)
-    photos_name = ['results_'+str(i)+'.png' for i in range(32)]
+  path = os.path.join(__DIRNAME__, 'results', 'word_cloud')
 
-    to_img = lambda x: Image.open(os.path.join(__DIRNAME__, 'results', 'word_cloud', x))
+  photos_name = os.listdir(path)
+  photos_name = [f'results_{str(i)}.png' for i in range(32)]
 
-    dic_imagens = {}
-    for i, x in enumerate(photos_name):
-        dic_imagens[f'Clustering label {i}'] = to_img(x)
-    
-    select_box(dic_imagens)
+  to_img = lambda x: Image.open(os.path.join(__DIRNAME__, 'results', 'word_cloud', x))
+
+  dic_imagens = {
+      f'Clustering label {i}': to_img(x)
+      for i, x in enumerate(photos_name)
+  }
+  select_box(dic_imagens)
 
 def make_parallel_coordinates(df, color, columns):
     return px.parallel_coordinates(
