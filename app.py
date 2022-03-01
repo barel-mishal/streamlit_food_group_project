@@ -1,6 +1,8 @@
+import io
 from optparse import Values
 import os
 from re import X
+from turtle import width
 from typing import List
 from helpers.constants import MACRO_NUTRIENTS
 import streamlit as st
@@ -110,67 +112,98 @@ def recommend(item):
 
   get_data_for_parallel_coordinates(df_foods_items.reset_index(), columns)
 
+def getnut():
+    nut = Image.open(os.path.join(__DIRNAME__, 'results', 'nutpng.png'))
+    st.image(nut, width=100)
+
+def rainbow():
+    nut = Image.open(os.path.join(__DIRNAME__, 'results', 'the-nutritional-rainbow.jpg'))
+    st.image(nut, width=500)
+
+def parallel_coordinates():   
+    df_foods_items = DATASET.set_index('smlmitzrach').loc[[item for items in FOOD_GROUP_EXAMPLE.values() for item in items]]
+
+    food_group_types = [[group]*len(Values) for group, Values in FOOD_GROUP_EXAMPLE.items()]
+    flatten = [groupid for group in food_group_types for groupid in group]
+    print(type(flatten[0]))
+    df_foods_items['TypeOfFoodGroup'] = flatten
+    
+
+    columns = ['TypeOfFoodGroup', 'protein', 'total_fat', 'carbohydrates', 'calcium', 'iron', 'magnesium']
+
+    
+    st.plotly_chart(px.parallel_coordinates(
+        df_foods_items[columns], 
+        color='TypeOfFoodGroup',
+        color_continuous_scale=px.colors.diverging.Tealrose,
+        color_continuous_midpoint=2, width=1000))
+
+def get_radar():
+    st.subheader('Figure F1')
+    radar = Image.open(os.path.join(__DIRNAME__, 'results', 'radar.png')) #learning_algo_accuracy.jpg
+    st.image(radar, use_column_width=True)
+
 
 
 
 def main():
-    lottie_book = load_lottieurl('https://assets2.lottiefiles.com/temp/lf20_nXwOJj.json')
-    st_lottie(lottie_book, speed=1, height=200, key="initial")
-    one, row0_1, three, row0_2, two = st.columns((.1, 2, .2, 1, .1))
+    # lottie_book = load_lottieurl('https://assets2.lottiefiles.com/temp/lf20_nXwOJj.json')
+    # st_lottie(lottie_book, speed=1, height=200, key="initial")
+    one, center, two = st.columns((1, 2, 1))
+    with center:
+        rainbow()
 
-    row0_1.title('Food Group')
+    one, row0_1, three, row0_2, two = st.columns((.1, 2, 0.5, 1, .1))
+    row0_1.title('NUT - Nutritionist Utility Tool')
+    with three:
+        getnut()
+    
+
 
     with row0_2:
         st.write('')
 
     row0_2.subheader('A Streamlit web app by Barel Mishal, Sapir Shapira, Yoav Orenbach and Hen Emuna')
     row1_spacer1, row1_1, row1_spacer2 = st.columns((.1, 3.2, .1))
-# ✔️
+
     with row1_1:
         st.header('**Motivation and problem description:**')
-        st.markdown("Food and Nutrition Science is a newly developed field critical for health and development. It affects our body’s homeostasis in general, specifically our immune system, sugar balance, and endocrine system. As a young research field, there is a need to deepen the field’s knowledge further. Moreover, we cannot partially leverage existing knowledge, as it contains many myths and biases, some of which are incorrect. An excellent example of this bias is the relation to fat, which is incorrectly considered unhealthy. In fact, it is the vast intake of sugar that comes from this thinking that causes many of the diseases today. As a result, Nutritionists must use both reliable information and scientifically supported tools to know the exact composition of food. This knowledge can be used both for personal diet recommendation as well as interdisciplinary research that may link the different nutritions to metabolic processes and a wide range of non-communicable diseases: type 2 diabetes, some developmental issues, and many more [1].")
-        st.markdown("A critical aspect of daily nutritionist’s work is to suggest dietary alterations for patients, based on their specific health profile, using previously defined food groups (s.a., Meat, milk, vegetables, fruits, and sweets). The rationale behind the clustering to food groups,  based on known macronutrients (carbohydrates, fats, and proteins) and an estimation of the equivalent micronutrients (Vitamins, and minerals), is to enable the creation of reliable tools, which would provide nutritionists and their patients the ability to create dietary alternatives and control regarding their food consumption.")
-        st.markdown('Nowadays, this clustering relies mainly on assumptions and lists of products learned by heart by Nutritionists.')
+        st.markdown("Food and Nutrition Science is a newly developed field critical for health and development. It affects our body’s homeostasis in general, specifically our immune system, sugar balance, and endocrine system. As a young research field, there is a need to deepen the field’s knowledge further. Moreover, we cannot partially leverage existing knowledge, as it contains many myths and biases, some of which are incorrect. An excellent example of this bias is the relation to fat, which is incorrectly considered unhealthy. In fact, it is the vast intake of sugar that comes from this thinking that causes many of the diseases today. As a result, Nutritionists must use both reliable information and scientifically supported tools to know the exact composition of food. This knowledge can be used both for personal diet recommendation as well as interdisciplinary research that may link the different nutritions to metabolic processes and a wide range of non-communicable diseases: type 2 diabetes, developmental issues, etc [1].")
+        st.markdown("A critical aspect of daily nutritionist’s work is to suggest dietary alternatives for patients, based on their specific health profile, using previously defined food groups (s.a., Meat, milk, vegetables, fruits, and sweets). The rationale behind the clustering to food groups,  based on known macronutrients (carbohydrates, fats, and proteins) and an estimation of the equivalent micronutrients (Vitamins, and minerals), is to enable the creation of reliable tools, which would provide nutritionists and their patients the ability to create dietary alternatives and control regarding their food consumption. Nowadays, this clustering relies mainly on assumptions and lists of products memorized by Nutritionists.")
 
     row2_spacer1, row2_1, row2_spacer2 = st.columns((.1, 3.2, .1))
     with row2_1:
         st.header('**Data:**')
 
-        st.markdown("Israeli nutrition data source (https://data.gov.il/dataset/nutrition-database) from the ministry of health.")
-        st.markdown("A table (10MBs) with 4650 records of 74 nutritional components: protein, fats, carbohydrates, amino acids, fatty acids, vitamins, and minerals. The table was created from a JSON file containing records and metadata, which was pre-processed (units conversion, missing fields, dropping non-helpful features like psolet, Supplements, and Recipes) and saved as a CSV. ")
-        st.markdown("In addition, we also use the U.S department of agriculture Food Data Central (FDC) dataset (135MBs), which the Israeli data relies on. After using the FDC API key to extract information (with web scraping), we built a table of 7600 records of 149 nutritional components containing the components of the firs table.")
-# ✔️
+        st.markdown("We gathered from the [Israeli government database catalog](https://info.data.gov.il/datagov/home/) a table (10MBs) with 4650 records of 74 [nutritional components](https://data.gov.il/dataset/nutrition-database): protein, fats, carbohydrates, amino acids, fatty acids, vitamins, and minerals. The table was created from a JSON file containing records and metadata, which was pre-processed (units conversion, missing fields, dropping non-helpful features like psolet, Supplements, and Recipes) and saved as a CSV. In addition, since the Israeli data quite is small we also use the U.S department of agriculture Food Data Central (FDC) dataset (135MBs) which the Israeli data relies on, in order to attempt to improve some of our results using more data. After using the FDC API key to extract information (with web scraping), we built a table of 7600 records of 149 nutritional components containing the components of the 1st table.")
+        st.markdown("Comparing the two, the FDC dataset has more records than the Israeli data as well as additional features per record (for example, FDC uses 3 types of vitamin K, whereas the Israeli data uses just one type based on those three types). Therefore, while these datasets are connected, their features can’t be mapped easily, in terms of features and item ids, requiring preprocessing to match them to the best of our knowledge.")
+        st.markdown('''
+        - Israeli nutrition data source (https://data.gov.il/dataset/nutrition-database) from the ministry of health.
+        - Food Data Central source (https://fdc.nal.usda.gov/)
+        ''')
+
     row2_spacer1, row_3, row2_spacer2 = st.columns((.1, 3.2, .1))
 
     with row_3:
         st.header('**Solution:**')
         st.markdown("Our goal is to improve the existing assumptions and biases used in the Israeli nutrition community, thus helping nutritionists offer better alternatives for their patience. In particular, we intend to make improvements in three areas:")
-# ✔️ 
+
         st.subheader('**1.** Clustering of food items to food groups.')
-        st.markdown('''There are no known food group labels for food items in the Israeli data (or the American data for that matter), since some food items cannot be classified into one food group, but to several. For example, if we look at a food item - Pizza, it could fall into the Fat food group as it has high amounts of fat, however, it could also fall into the dairy food group depending on the amount of cheese on the pizza. Moreover, a pizza could be in the cereal food group because of its bread. Many more examples follow, though there are some food items which we unequivocally know their food group, like milk for instance.''')
-        st.markdown("For this matter, we received a list from the ministry of health containing all the Israeli food groups (32) with known food items in each group, and our objective is to cluster the different food items in the Israeli data into their respective food groups. We want to use the known ones and let the clustering algorithms answer the question of how to label food items that fall under more than one food group category. The inputs for the clustering algorithms are the macronutrients (proteins, carbohydrates and fats), since they are the values who mostly affect the labeling of each food item to a food group as we can see in the following radar plot:") 
-        
-        
-        radar = Image.open(os.path.join(__DIRNAME__, 'results', 'radar.jpg')) #learning_algo_accuracy.jpg
-        st.image(radar, use_column_width=True)
-        
-        df_foods_items = DATASET.set_index('smlmitzrach').loc[[item for items in FOOD_GROUP_EXAMPLE.values() for item in items]]
-        
-        food_group_types = [[group]*len(Values) for group, Values in FOOD_GROUP_EXAMPLE.items()]
-        flatten = [groupid for group in food_group_types for groupid in group]
-        print(type(flatten[0]))
-        df_foods_items['TypeOfFoodGroup'] = flatten
-        
+        st.markdown('''There are no known food group labels for food items in the Israeli data (or the American data for that matter) since some food items cannot be classified into one food group but into several. For example, if we look at a food item - Pizza, it could fall into the Fat food group as it has high amounts of fat, however, it could also fall into the dairy food group depending on the amount of cheese on the pizza. Moreover, a pizza could be in the pastries food group because it contains bread. Many more examples follow, though there are some food items which we unequivocally know their food group, like milk, for instance.''')
+        st.markdown("Therefore, our objective as a first step in the analysis is to cluster all food items in the Israeli data into their respective food group.") 
+        st.markdown('''
+        To deal with the ambiguity in the food-groups clustering, we received a [list from the ministry of health](https://docs.google.com/document/d/1aJYJs4XUrMqhAfBYMaFdSmwESYzJKPk9/edit?usp=sharing&ouid=108062365532375633132&rtpof=true&sd=true) containing all the Israeli food groups with known food items in each group (containing 11 main food groups and 32 sub food groups). However, this list is lacking, containing only 320 food items. To expand our food-groups estimation with this ground-truth information, we use a set of clustering algorithms to cluster the additional food items in our dataset, i.e. the missing food items in the given list, as close as we can to the known food items.
+        For our clustering algorithm, we compared the following (algorithms with varying un/even cluster size, different expected manifolds geometry, with/out outlier removal):
 
-        columns = ['TypeOfFoodGroup', 'protein', 'total_fat', 'carbohydrates', 'calcium', 'iron', 'magnesium']
+- K Means
+- Agglomerative
+- DBScan
+- Spectral clustering.
 
-        
-        st.plotly_chart(px.parallel_coordinates(
-            df_foods_items[columns], 
-            color='TypeOfFoodGroup',
-            color_continuous_scale=px.colors.diverging.Tealrose,
-            color_continuous_midpoint=2, width=1000))
+        ''') 
+        get_radar()
 
+        # parallel_coordinates()
         st.markdown("In this plot we present 3 food items where each one belongs to a different food group (Chicken breast = Meat group for chicken and turkey, Pita = Pastry group for breads, and Hazelnut = Nuts and seeds group), and we can see how their different macronutrient breakdown differs, thus implying their food group.")
         st.markdown("We applied many clustering algorithms (un/even cluster size, different expected manifolds geometry, with/out outlier removal, etc) – K Means, Agglomerative, DBScan and Spectral clustering, and show the results in a [Heroku dashboard site](https://dashboard-food-group.herokuapp.com/) (might need to load for a few seconds) where one can switch between the algorithms and see a plot of the results, along with a mapping table between food groups and the clustering labels (detailed in the evaluation section).")
 
