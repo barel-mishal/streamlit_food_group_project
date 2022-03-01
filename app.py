@@ -98,8 +98,6 @@ def recommend(item):
   st.markdown(''' ##### המלצה לפי ערכי מאקרו ומיקרו דומים ''')
   r3
 
-  get_data_for_parallel_coordinates(df_foods_items.reset_index(), columns)
-
 def getnut():
     nut = Image.open(os.path.join(__DIRNAME__, 'results', 'nutpng.png'))
     st.image(nut, width=100)
@@ -147,15 +145,11 @@ def main():
     row0_1.title('NUT - Nutritionist Utility Tool')
     with three:
         getnut()
+
     
-
-
-    with row0_2:
-        st.write('')
-
-    row0_2.subheader('A Streamlit web app by Barel Mishal, Sapir Shapira, Yoav Orenbach and Hen Emuna')
+    st.subheader('A Streamlit web app by Barel Mishal, Sapir Shapira, Yoav Orenbach and Hen Emuna')
+   
     row1_spacer1, row1_1, row1_spacer2 = st.columns((.1, 3.2, .1))
-
     with row1_1:
         st.header('**Motivation and problem description:**')
         st.markdown("Food and Nutrition Science is a newly developed field critical for health and development. It affects our body’s homeostasis in general, specifically our immune system, sugar balance, and endocrine system. As a young research field, there is a need to deepen the field’s knowledge further. Moreover, we cannot partially leverage existing knowledge, as it contains many myths and biases, some of which are incorrect. An excellent example of this bias is the relation to fat, which is incorrectly considered unhealthy. In fact, it is the vast intake of sugar that comes from this thinking that causes many of the diseases today. As a result, Nutritionists must use both reliable information and scientifically supported tools to know the exact composition of food. This knowledge can be used both for personal diet recommendation as well as interdisciplinary research that may link the different nutritions to metabolic processes and a wide range of non-communicable diseases: type 2 diabetes, developmental issues, etc [1].")
@@ -249,9 +243,9 @@ def main():
     We can see that the Agglomerative clustering achieves the best scores on all metrics (the orange bar is the highest across all measures). Some sub food groups have very similar macronutrient breakdown, so it is quite hard to cluster them perfectly when the inputs are very similar, though we can see promising results with Agglomerative and with more ground truths we believe it can be improved.
         ''')
 
-    st.markdown("To further visualize and qualitatively evaluate our clustering, we use a word-could to show similarities between the food-groups. These figures show the food-items text (without stopwords) as well as their attached food groups written as their titles. Clusters without a mapping to a known food group are titled as ‘לא סווג’. All word clouds for each cluster label can be seen here, where some word clouds have labels that were mapped to a single food group, while others have lables that wee mapped to several food groups.")
-    st.markdown('##### Figure 4')
-    select_word_cloud()
+        st.markdown("To further visualize and qualitatively evaluate our clustering, we use a word-could to show similarities between the food-groups. These figures show the food-items text (without stopwords) as well as their attached food groups written as their titles. Clusters without a mapping to a known food group are titled as ‘לא סווג’. All word clouds for each cluster label can be seen here, where some word clouds have labels that were mapped to a single food group, while others have lables that wee mapped to several food groups.")
+        st.markdown('##### Figure 4')
+        select_word_cloud()
 
     line1_spacer1, line2_1, line1_spacer2 = st.columns((.1, 3.2, .1))
 
