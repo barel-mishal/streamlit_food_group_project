@@ -2,12 +2,9 @@ import io
 from optparse import Values
 import os
 from re import X
-from turtle import width
-from typing import List
 from helpers.constants import MACRO_NUTRIENTS
 import streamlit as st
 import pandas as pd
-from streamlit_lottie import st_lottie
 import requests
 import plotly.express as px
 from recommender_system import show_recommendations
@@ -23,13 +20,6 @@ FOOD_GROUP_EXAMPLE = {
     3: [41302020,41303030,41101120,41400030,75224022,41400030,41205149,41209028,42116030],# הקטניות
     4: [43102000,43102119,43101000,42107000,82104000,82101000,82101029,82101100,82101300],# קבוצת השמנים
 }
-
-st.set_page_config(layout="wide")
-def load_lottieurl(url: str):
-    r = requests.get(url)
-    if r.status_code != 200:
-        return None
-    return r.json()
 
 def recommender():
   # taking only the items names 
