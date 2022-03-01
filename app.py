@@ -49,10 +49,12 @@ def select_word_cloud():
     path = os.path.join(__DIRNAME__, 'results', 'word_cloud')
     
     photos_name = os.listdir(path)
-
+    #  name_number.png
+    parse = lambda x: x.split('_')[1].split('.')[0]
     to_img = lambda x: Image.open(os.path.join(__DIRNAME__, 'results', 'word_cloud', x))
-
-    dic_imagens = {f'Lable {x}': to_img(x) for x in photos_name}
+    
+    dic_imagens = {f'clustring Lable {parse(x)}': to_img(x) for x in photos_name}
+    
     
     select_box(dic_imagens)
 
