@@ -92,11 +92,11 @@ def recommend(item):
 
 
   st.markdown(''' #####  המלצה לפי טקסט דומה ''')
-  r1
+  r1.shmmitzrach
   st.markdown(''' #####  המלצה לפי ערכי מאקרו דומים ''')
-  r2
+  r2.shmmitzrach
   st.markdown(''' ##### המלצה לפי ערכי מאקרו ומיקרו דומים ''')
-  r3
+  r3.shmmitzrach
 
 def getnut():
     nut = Image.open(os.path.join(__DIRNAME__, 'results', 'nutpng.png'))
