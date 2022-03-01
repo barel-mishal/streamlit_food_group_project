@@ -202,11 +202,18 @@ def main():
 
         ''') 
         get_radar()
-
+        st.markdown('Comparing the proportion of the three macronutrients (proteins, carbohydrates, and fats) and alcohol for different food items; Chicken breast (blue) belongs to Meat group for chicken and turkey, Pita (red) belongs to Pastry group for breads, Hazelnut (green) belongs to Nuts and seeds group, and Wine (purple) belongs to Alcoholic beverages.')
         # parallel_coordinates()
-        st.markdown("In this plot we present 3 food items where each one belongs to a different food group (Chicken breast = Meat group for chicken and turkey, Pita = Pastry group for breads, and Hazelnut = Nuts and seeds group), and we can see how their different macronutrient breakdown differs, thus implying their food group.")
-        st.markdown("We applied many clustering algorithms (un/even cluster size, different expected manifolds geometry, with/out outlier removal, etc) – K Means, Agglomerative, DBScan and Spectral clustering, and show the results in a [Heroku dashboard site](https://dashboard-food-group.herokuapp.com/) (might need to load for a few seconds) where one can switch between the algorithms and see a plot of the results, along with a mapping table between food groups and the clustering labels (detailed in the evaluation section).")
+        st.markdown("Visualization of our clustering result can be seen at the following  [Heroku dashboard site](https://dashboard-food-group.herokuapp.com/) site (might take a few seconds to load), allowing a qualitative evaluation of the clustering, for each of the chosen algorithms (a quantitative evaluation is expanded under ‘evaluation’ section).")
+        st.markdown('''
+        Our clustering results are verified between the different algorithms used. Fig 2 shows an example of a Spectral clustering result, where we map each cluster to the matching food-group, using the known food-items list mentioned above.
+        
+        As we can see, there are cases where the clustering result is not ideal, meaning we don’t get a one-to-one mapping between each cluster and its respective food group, but rather several food-groups (at most 3 food groups assigned).
 
+        ''')
+
+        st.markdown('Mapping food groups to the clustering algorithm`s labels. Green checkmark signifies a mapping between a food group and a label. An ideal  clustering would have a one-to-one mapping between the food groups and the labels. As we can see there are mismatches in this mapping, for example cluster #24 has two contradicting food groups, and cluster #8 does not match any known food groups.')
+        get_radar() # TODO: switch it to mapping table
 
         st.subheader('**2.** Predicting food’s micronutrients based on their macronutrients using machine and deep learning principles.')
         st.markdown('''Our input contains the macronutrients – proteins, carbohydrates and fats, while our output contains the micronutrients – vitamins and minerals.
