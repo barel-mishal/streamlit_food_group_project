@@ -139,12 +139,14 @@ def parallel_coordinates():
         color_continuous_midpoint=2, width=1000))
 
 def get_radar():
-    st.subheader('Figure F1')
+    st.subheader('Figure 1')
     radar = Image.open(os.path.join(__DIRNAME__, 'results', 'radar.png')) #learning_algo_accuracy.jpg
-    st.image(radar, use_column_width=True)
+    st.image(radar) # , use_column_width=True
 
 
-
+def get_table():
+    st.subheader('Figure 2')
+    st.image(Image.open(os.path.join(__DIRNAME__, 'results', 'Mappingtable.jpg')))
 
 def main():
     # lottie_book = load_lottieurl('https://assets2.lottiefiles.com/temp/lf20_nXwOJj.json')
@@ -169,13 +171,13 @@ def main():
     with row1_1:
         st.header('**Motivation and problem description:**')
         st.markdown("Food and Nutrition Science is a newly developed field critical for health and development. It affects our body’s homeostasis in general, specifically our immune system, sugar balance, and endocrine system. As a young research field, there is a need to deepen the field’s knowledge further. Moreover, we cannot partially leverage existing knowledge, as it contains many myths and biases, some of which are incorrect. An excellent example of this bias is the relation to fat, which is incorrectly considered unhealthy. In fact, it is the vast intake of sugar that comes from this thinking that causes many of the diseases today. As a result, Nutritionists must use both reliable information and scientifically supported tools to know the exact composition of food. This knowledge can be used both for personal diet recommendation as well as interdisciplinary research that may link the different nutritions to metabolic processes and a wide range of non-communicable diseases: type 2 diabetes, developmental issues, etc [1].")
-        st.markdown("A critical aspect of daily nutritionist’s work is to suggest dietary alternatives for patients, based on their specific health profile, using previously defined food groups (s.a., Meat, milk, vegetables, fruits, and sweets). The rationale behind the clustering to food groups,  based on known macronutrients (carbohydrates, fats, and proteins) and an estimation of the equivalent micronutrients (Vitamins, and minerals), is to enable the creation of reliable tools, which would provide nutritionists and their patients the ability to create dietary alternatives and control regarding their food consumption. Nowadays, this clustering relies mainly on assumptions and lists of products memorized by Nutritionists.")
+        st.markdown("A critical aspect of daily nutritionist’s work is to suggest dietary alternatives for patients, based on their specific health profile, using previously defined food groups (s.a., Meat, milk, vegetables, fruits, and sweets). The rationale behind the clustering to food groups, based on known macronutrients (carbohydrates, fats, and proteins) and an estimation of the equivalent micronutrients (Vitamins, and minerals), is to enable the creation of reliable tools, which would provide nutritionists and their patients the ability to create dietary alternatives and control regarding their food consumption. Nowadays, this clustering relies mainly on assumptions and lists of products memorized by Nutritionists.")
 
     row2_spacer1, row2_1, row2_spacer2 = st.columns((.1, 3.2, .1))
     with row2_1:
         st.header('**Data:**')
 
-        st.markdown("We gathered from the [Israeli government database catalog](https://info.data.gov.il/datagov/home/) a table (10MBs) with 4650 records of 74 [nutritional components](https://data.gov.il/dataset/nutrition-database): protein, fats, carbohydrates, amino acids, fatty acids, vitamins, and minerals. The table was created from a JSON file containing records and metadata, which was pre-processed (units conversion, missing fields, dropping non-helpful features like psolet, Supplements, and Recipes) and saved as a CSV. In addition, since the Israeli data quite is small we also use the U.S department of agriculture Food Data Central (FDC) dataset (135MBs) which the Israeli data relies on, in order to attempt to improve some of our results using more data. After using the FDC API key to extract information (with web scraping), we built a table of 7600 records of 149 nutritional components containing the components of the 1st table.")
+        st.markdown("We gathered from the [Israeli government database catalog](https://info.data.gov.il/datagov/home/) a table (10MBs) with 4650 records of 74 [nutritional components](https://data.gov.il/dataset/nutrition-database): protein, fats, carbohydrates, amino acids, fatty acids, vitamins, and minerals. The table was created from a JSON file containing records and metadata, which was pre-processed (units conversion, missing fields, dropping non-helpful features like psolet, Supplements, and Recipes) and saved as a CSV. In addition, since the Israeli data is quite small we also use the U.S department of agriculture Food Data Central (FDC) dataset (135MBs) which the Israeli data relies on, in order to attempt to improve some of our results using more data. After using the FDC API key to extract information (with web scraping), we built a table of 7600 records of 149 nutritional components containing the components of the 1st table.")
         st.markdown("Comparing the two, the FDC dataset has more records than the Israeli data as well as additional features per record (for example, FDC uses 3 types of vitamin K, whereas the Israeli data uses just one type based on those three types). Therefore, while these datasets are connected, their features can’t be mapped easily, in terms of features and item ids, requiring preprocessing to match them to the best of our knowledge.")
         st.markdown('''
         - Israeli nutrition data source (https://data.gov.il/dataset/nutrition-database) from the ministry of health.
@@ -200,7 +202,8 @@ def main():
 - DBScan
 - Spectral clustering.
 
-        ''') 
+        ''')
+        st.markdown("As our features vector for the clustering, we chose the three macronutrients (proteins, carbohydrates, and fats) and alcohol, as these gave the best results based on our evaluation (shown at Fig 3). Fig 1 shows an illustration of the possible distinction between different food items based on these four features. As we can see, for the exemplar food items, there is a clear separation, matching their expected food groups.")
         get_radar()
         st.markdown('Comparing the proportion of the three macronutrients (proteins, carbohydrates, and fats) and alcohol for different food items; Chicken breast (blue) belongs to Meat group for chicken and turkey, Pita (red) belongs to Pastry group for breads, Hazelnut (green) belongs to Nuts and seeds group, and Wine (purple) belongs to Alcoholic beverages.')
         # parallel_coordinates()
@@ -212,36 +215,34 @@ def main():
 
         ''')
 
+        get_table()
         st.markdown('Mapping food groups to the clustering algorithm`s labels. Green checkmark signifies a mapping between a food group and a label. An ideal  clustering would have a one-to-one mapping between the food groups and the labels. As we can see there are mismatches in this mapping, for example cluster #24 has two contradicting food groups, and cluster #8 does not match any known food groups.')
-        get_radar() # TODO: switch it to mapping table
 
-        st.subheader('**2.** Predicting food’s micronutrients based on their macronutrients using machine and deep learning principles.')
-        st.markdown('''Our input contains the macronutrients – proteins, carbohydrates and fats, while our output contains the micronutrients – vitamins and minerals.
-    We applied many machine-learning algorithms since the connection between macronutrients and micronutrients is not pre-established. Specifically we used:
-    Linear regression (compared with variations s.a. ridge regression and kernels), K-nearest neighbors, Gaussian-process regression, Tree-based regressors (with ensembles): Decision tree, Random forest, XGBoost, Neural network (multi-layer perceptron)''')
+        st.subheader('**2.** Predicting food’s micronutrients based on their macronutrients.')
+        st.markdown("We attempt to predict the values of the most well known vitamins (vitamin A IU, vitamin A RE, vitamin E, vitamin C, thiamin, riboflavin, niacin, vitamin B6, folate, folate dfe, vitamin B12, carotene, vitamin K, vitamine D, and choline) and minerals (calcium, iron, magnesium, phosphorus, potassium, sodium, zinc, copper, manganese, and selenium), since the connection between macronutrients and micronutrients are unknown and not trivial.")
+        st.markdown("Our input contains the macronutrients – proteins, carbohydrates, and fats, while our output contains the micronutrients – vitamins and minerals.")
+        st.markdown('''We applied various machine-learning algorithms:
+- Linear regression (compared with variations s.a. ridge and kernels).
+- K-nearest neighbors.
+- Gaussian-process regression.
+- Tree-based regressors: Decision tree, Random forest, XGBoost.
+- Neural network (multi-layer perceptron)
+    ''')
+        st.markdown("As part of our preprocessing for the prediction, we had to deal with the existence of NaN values across the different features. In our data there are many macronutrients with NaN values, partly because they were not tested for some food items and partly because it is known that they are equal to zero so there was no need to test. Due to this ambiguity we decided to drop NaN values in our training and testing, to later predict those values for our next step. Evaluation of the predictions are shown at Fig 5.")
 
     row2_spacer1, row_7, row2_spacer2 = st.columns((.1, 3.2, .1))
     with row_7:
-        st.subheader('**3.** Recommendation of food alternatives based on similar products within the same food group.')
+        st.subheader('**3.** Recommend food alternatives based on similar products.')
 
-        st.markdown(
-            '''
-Since there are no known ratings and we did not have enough time to gather ratings for the food items in our data, we decided to use a content based recommender system. One of the downsides of using content based recommenders is that finding the appropriate features for each food item profile is hard. Therefore, we used three different feature vectors:
-
-a)    Food items names
-
-b)    Food items macronutrients
-
-c)    Food items macronutrients + micronutrients
-
-As for the prediction heuristic, given a food item and any of the item’s profiles, we compute the cosine similarity between them and return the top ten most similar food items (based on that profile). In addition, since many micronutrients values are missing from the data and we wish to use them for our third feature vector, we use our second step – the micronutrient prediction to fill any missing values. ''')
-
+        st.markdown("In this section our goal was to provide alternatives for a specific food item within the same food group. Since there are no ratings for each food item, we turn to a content-based recommender system. One of the downsides of using content-based recommenders is that finding the appropriate features for each food item profile is hard. Therefore, we used three different feature vectors to test three different recommendations: Food items names, Food items macronutrients, Food items macronutrients + micronutrients.")
+        st.markdown("As for the prediction heuristic, given a food item and any of the item’s profiles, we compute the cosine similarity between them and return the top ten most similar food items (based on that profile). In order to compute the cosine similarity between food items names, we first use the Term frequency-Inverse Document Frequency (TF-IDF) with an hebrew tokenizer (to transform the hebrew text to a meaningful representation) and then we can apply the cosine similarity. Computing the cosine similarity for food items macronutrients and micronutrients is straightforward by applying it on its values. In addition, since many micronutrients values are missing from the data and we wish to use them for our third feature vector, we use our second step – the micronutrient prediction to fill any missing values.")
+        st.markdown("A demo for the recommendations can be seen here, where you can enter a food item in Hebrew and see 3 different kinds of recommendations based on the three item profiles.")
+        recommender()
     
     line1_spacer1, line1_1, line1_spacer2 = st.columns((.1, 3.2, .1))
 
     with line1_1:
-        st.header('Evaluation:')  
-        st.markdown('Evaluation criteria, results and visualizations for each part:')
+        st.header('Evaluation:')
     
     
     line1_spacer1, line2_1, line1_spacer2 = st.columns((.1, 3.2, .1))
@@ -251,43 +252,17 @@ As for the prediction heuristic, given a food item and any of the item’s profi
 
         st.markdown(
                 '''
-    Seeing as there are no labels of food groups, we opted to use domain knowledge to evaluate our clustering. As noted before, we received a list from the ministry of health containing the known food items of each one of the 32 food groups and used this knowledge for our evaluation, however, the food items in it do not perfectly match the Israeli data, causing a problem with such a list.
-
-    Hence, we first mapped 32 food items from the data into their respective food group. Then, after applying a clustering algorithm, we mapped the cluster labels of the 32 food items to the food groups we already assigned. For instance, if food item 1 was mapped to the meat food group and the clustering algorithm put it in the third cluster (so cluster label 3), then label 3 maps to the meat food group.
-
-    If we manage to receive one-to-one mapping between the algorithm’s clustering labels to the food groups (so every label has a single food group), we can consider the clustering as a success. However, if a food group was given more than one label, then we know the clustering was not perfect, as we know from the ministry of health that the food items we used belong to different food groups.
-
-    The results we got varied between different clustering algorithms, yet Spectral clustering achieved the most dispersed labels with at most 3 food groups assigned to a label.
-
-    We visualize this result using a table where a green checkmark signifies a mapping between a food group and a label:
+    The main issue with the visual evaluation (as shown in Fig 1 and Fig 2) is that we would prefer a quantification using our ground truth labels. Thus, in order to see a numerical evaluation of our clustering, we created a test set containing the known food items to food groups (from the ministry of health list, 320 food items). We applied the following extrinsic measures (metrics used for comparing two clustering labels): Adjusted Rand Index score, Fowlkes Mellows score, Adjusted Mutual Information score and the V-measure score. Using these metrics we could further optimize our clustering algorithms (for instance, we decided to also use alcohol as part of our input as it also helped us increase our scores).
     ''')
-        
-        st.image(Image.open(os.path.join(__DIRNAME__, 'results', 'Mappingtable.jpg')))
+        st.subheader('Figure 3')
+        st.image(Image.open(os.path.join(__DIRNAME__, 'results', 'cluster_scores.png')))
         
         st.markdown('''
-    This is the table received for Spectral clustering and all tables can be seen at the Heroku dashboard site.
-        
-    The main issue with this evaluation is that it cannot be quantified as there are no real ground truths we can use. Thus, in order to see a numerical evaluation of our clustering, we created a new table containing all the known food items of every food group from our data (which came out to 320 food items) using the items from the ministry of health list. We applied our clustering algorithms to those food items and compared the resulting clustering labels to the ground truths using the clustering metrics: Adjusted Rand Index score, Fowlkes Mellows score, Adjusted Mutual Info score and the V-measure score (All of the above are measures for comparing two clusters).
-
-    Using these metrics we could further optimize our clustering algorithms (for instance, we decided to also use alcohol as part of our input as it also helped us increase our scores), and the scores each algorithm achieved are the following:
+    We can see that the Agglomerative clustering achieves the best scores on all metrics (the orange bar is the highest across all measures). Some sub food groups have very similar macronutrient breakdown, so it is quite hard to cluster them perfectly when the inputs are very similar, though we can see promising results with Agglomerative and with more ground truths we believe it can be improved.
         ''')
 
-    one, two = st.columns((1, 1)) 
-
-    with one:
-        path = os.path.join(__DIRNAME__, 'results', 'results_clustering_comparison_flip.jpg')
-        st.image(Image.open(path), use_column_width=True)
-    with two:
-        path2 = os.path.join(__DIRNAME__, 'results', 'results_clustering_comparison.jpg')
-        st.image(Image.open(path2), use_column_width=True)     
-
-    line1_spacer1, line2_13, line1_spacer2 = st.columns((.4, 2, .4))
-
-    with line2_13:
-        st.markdown('''
-We can see that the Agglomerative clustering achieves the best scores on all metrics, though its mapping table is not as good as the Spectral clustering table. The results are still lacking, however, some sub food groups have very similar macronutrient breakdown, so it is quite hard to cluster them perfectly when the inputs are very similar. Finally, we can see that the clustering does a gfood job with many food groups and show it with a word cloud of for each food group:
-''')
-        select_word_cloud()        
+    st.markdown("To further visualize and qualitatively evaluate our clustering, we use a word-could to show similarities between the food-groups. These figures show the food-items text (without stopwords) as well as their attached food groups written as their titles. Clusters without a mapping to a known food group are titled as ‘לא סווג’. All word clouds for each cluster label can be seen here, where some word clouds have labels that were mapped to a single food group, while others have lables that wee mapped to several food groups.")
+    select_word_cloud()
 
     line1_spacer1, line2_1, line1_spacer2 = st.columns((.1, 3.2, .1))
 
@@ -304,7 +279,7 @@ We can see that the Agglomerative clustering achieves the best scores on all met
 
             ''')
 
-        path2 = os.path.join(__DIRNAME__, 'results', 'accu_on_test.jpg')
+        path2 = os.path.join(__DIRNAME__, 'results', 'accu_on_test.png')
         st.image(Image.open(path2), use_column_width=True)   
 
         st.markdown(
@@ -317,7 +292,7 @@ We can see that the Agglomerative clustering achieves the best scores on all met
         st.subheader('3. Evaluating food alternatives recommendation:')
         
         
-        recommender()
+        #recommender()
 
 
         # st.pyplot(fig)
